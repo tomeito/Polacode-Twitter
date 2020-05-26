@@ -12,6 +12,7 @@
   const snippetNode = document.getElementById('snippet')
   const snippetContainerNode = document.getElementById('snippet-container')
   const obturateur = document.getElementById('save')
+  const tweetButton = document.getElementById('tweet')
 
   snippetContainerNode.style.opacity = '1'
   const oldState = vscode.getState();
@@ -133,6 +134,12 @@
     } else {
       shootSnippet()
     }
+  })
+
+  tweetButton.addEventListener('click', () => {
+    vscode.postMessage({
+      type: 'tweet'
+    })
   })
 
   function shootAll() {
