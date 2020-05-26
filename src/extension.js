@@ -8,6 +8,14 @@ const writeSerializedBlobToFile = (serializeBlob, fileName) => {
   fs.writeFileSync(fileName, Buffer.from(bytes))
 }
 
+const checkIfKeyIsNoSet = (key) => {return key === undefined || key === ''}
+const credentialArray = [
+  vscode.workspace.getConfiguration().get('twitter.comsumerKey'),
+  vscode.workspace.getConfiguration().get('twitter.comsumerSecret'),
+  vscode.workspace.getConfiguration().get('twitter.accessTokenKey'),
+  vscode.workspace.getConfiguration().get('twitter.accessTokenSecret'),
+]
+
 const P_TITLE = 'Polacode 📸'
 
 /**
