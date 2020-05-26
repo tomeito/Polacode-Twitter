@@ -27,6 +27,29 @@ function activate(context) {
   let lastUsedImageUri = vscode.Uri.file(path.resolve(homedir(), 'Desktop/code.png'))
   let panel
 
+  const checkIfKeyIsNoSet = (key) => {
+    return key === undefined || key === ""
+  }
+  const credentialArray = [
+    vscode.workspace.getConfiguration().get("twitter.comsumerKey"),
+    vscode.workspace.getConfiguration().get("twitter.comsumerSecret"),
+    vscode.workspace.getConfiguration().get("twitter.accessTokenKey"),
+    vscode.workspace.getConfiguration().get("twitter.accessTokenSecret"),
+  ]
+
+  if (credentialArray.every(checkIfKeyIsNoSet)) {
+    vscode.window.showErrorMessage(
+      `Polacode-Twitter / Your Twitter credentials don't seem to have been entered. Please follow the extension's README to set it.`
+    )
+  }
+
+  const client = new Twitter({
+    consumer_key: credentialArray[0],
+    consumer_secret: credentialArray[1],
+    access_token_key: credentialArray[2],
+    access_token_secret: credentialArray[3]
+  })
+
   vscode.window.registerWebviewPanelSerializer('polacode', {
     async deserializeWebviewPanel(_panel, state) {
       panel = _panel
