@@ -33,21 +33,8 @@
       const bytes = new Uint8Array(fileReader.result)
       cb(Array.from(bytes).join(','))
     }
-    function getBrightness(color) {
-      const rgb = this.toRgb()
-      return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000
-    }
 
     fileReader.readAsArrayBuffer(blob)
-  }
-
-  function shoot(serializedBlob) {
-    vscode.postMessage({
-      type: 'shoot',
-      data: {
-        serializedBlob
-      }
-    })
   }
 
   function getBrightness(hexColor) {
@@ -129,70 +116,130 @@
   })
 
   obturateur.addEventListener('click', () => {
-    if (target === 'container') {
-      shootAll() 
-    } else {
-      shootSnippet()
-    }
+    const config = returnedBlobCofing(target)
+    toBlobSaveImage(config)
   })
 
   tweetButton.addEventListener('click', () => {
-    vscode.postMessage({
-      type: 'tweet'
-    })
+    const config = returnedBlobCofing(target)
+    toBlobUploadImage(config)
   })
 
-  function shootAll() {
-    const width = snippetContainerNode.offsetWidth * 2
-    const height = snippetContainerNode.offsetHeight * 2
-    const config = {
-      width,
-      height,
-      style: {
-        transform: 'scale(2)',
-        'transform-origin': 'center',
-        background: getRgba(backgroundColor, transparentBackground)
-      }
-    }
-
-    // Hide resizer before capture
-    snippetNode.style.resize = 'none'
-    snippetContainerNode.style.resize = 'none'
-
-    domtoimage.toBlob(snippetContainerNode, config).then(blob => {
-      snippetNode.style.resize = ''
-      snippetContainerNode.style.resize = ''
-      serializeBlob(blob, serializedBlob => {
-        shoot(serializedBlob)
-      })
-    })
-  }
-
-  function shootSnippet() {
+  function returnedBlobCofing(target) {
+    const targetIsContainer = target === 'container'
+    const bgColor = getRgba(backgroundColor, transparentBackground)
     const width = snippetNode.offsetWidth * 2
     const height = snippetNode.offsetHeight * 2
-    const config = {
+    let config = {
       width,
       height,
       style: {
-        transform: 'scale(2)',
-        'transform-origin': 'center',
-        padding: 0,
-        background: 'none'
-      }
+        transform: "scale(2)",
+        "transform-origin": "center",
+        background: targetIsContainer ? bgColor : none,
+      },
+    }
+  
+    if (!targetIsContainer) {
+      config.padding = 0
     }
 
-    // Hide resizer before capture
-    snippetNode.style.resize = 'none'
-    snippetContainerNode.style.resize = 'none'
+    return config
+  }
 
-    domtoimage.toBlob(snippetContainerNode, config).then(blob => {
-      snippetNode.style.resize = ''
-      snippetContainerNode.style.resize = ''
-      serializeBlob(blob, serializedBlob => {
-        shoot(serializedBlob)
+  // function shootAll() {
+  //   const width = snippetContainerNode.offsetWidth * 2
+  //   const height = snippetContainerNode.offsetHeight * 2
+  //   const config = {
+  //     width,
+  //     height,
+  //     style: {
+  //       transform: 'scale(2)',
+  //       'transform-origin': 'center',
+  //       background: getRgba(backgroundColor, transparentBackground)
+  //     }
+  //   }
+
+  //   // Hide resizer before capture
+  //   snippetNode.style.resize = 'none'
+  //   snippetContainerNode.style.resize = 'none'
+
+  //   domtoimage.toBlob(snippetContainerNode, config).then(blob => {
+  //     snippetNode.style.resize = ''
+  //     snippetContainerNode.style.resize = ''
+  //     serializeBlob(blob, serializedBlob => {
+  //       shoot(serializedBlob)
+  //     })
+  //   })
+  // }
+
+  // function shootSnippet() {
+  //   const width = snippetNode.offsetWidth * 2
+  //   const height = snippetNode.offsetHeight * 2
+  //   const config = {
+  //     width,
+  //     height,
+  //     style: {
+  //       transform: 'scale(2)',
+  //       'transform-origin': 'center',
+  //       padding: 0,
+  //       background: 'none'
+  //     }
+  //   }
+
+  //   // Hide resizer before capture
+  //   snippetNode.style.resize = 'none'
+  //   snippetContainerNode.style.resize = 'none'
+
+  //   domtoimage.toBlob(snippetContainerNode, config).then(blob => {
+  //     snippetNode.style.resize = ''
+  //     snippetContainerNode.style.resize = ''
+  //     serializeBlob(blob, serializedBlob => {
+  //       shoot(serializedBlob)
+  //     })
+  //   })
+  // }
+
+  function toBlobSaveImage(config) {
+    // Hide resizer before capture
+    snippetNode.style.resize = "none"
+    snippetContainerNode.style.resize = "none"
+
+    domtoimage
+      .toBlob(snippetContainerNode, config)
+      .then((blob) => {
+        snippetNode.style.resize = ""
+        snippetContainerNode.style.resize = ""
+        serializeBlob(blob, (serializedBlob) => {
+          vscode.postMessage({
+            type: "shoot",
+            data: {
+              serializedBlob,
+            },
+          })
+        })
       })
-    })
+  }
+
+  function toBlobUploadImage(config) {
+    // Hide resizer before capture
+    snippetNode.style.resize = "none"
+    snippetContainerNode.style.resize = "none"
+
+    domtoimage
+      .toBlob(snippetContainerNode, config)
+      .then((blob) => {
+        snippetNode.style.resize = ""
+        snippetContainerNode.style.resize = ""
+        serializeBlob(blob, (serializedBlob) => {
+          vscode.postMessage({
+            type: "tweet",
+            data: {
+              serializedBlob
+            }
+          })
+        })
+      })
   }
 
   let isInAnimation = false
