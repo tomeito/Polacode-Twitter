@@ -1,7 +1,8 @@
-const vscode = require('vscode')
-const fs = require('fs')
-const path = require('path')
-const { homedir } = require('os')
+const vscode = require("vscode")
+const fs = require("fs")
+const path = require("path")
+const { homedir } = require("os")
+const Twitter = require("twitter")
 
 const writeSerializedBlobToFile = (serializeBlob, fileName) => {
   const bytes = new Uint8Array(serializeBlob.split(','))
@@ -10,10 +11,10 @@ const writeSerializedBlobToFile = (serializeBlob, fileName) => {
 
 const checkIfKeyIsNoSet = (key) => {return key === undefined || key === ''}
 const credentialArray = [
-  vscode.workspace.getConfiguration().get('twitter.comsumerKey'),
-  vscode.workspace.getConfiguration().get('twitter.comsumerSecret'),
-  vscode.workspace.getConfiguration().get('twitter.accessTokenKey'),
-  vscode.workspace.getConfiguration().get('twitter.accessTokenSecret'),
+  vscode.workspace.getConfiguration().get("twitter.consumerKey"),
+  vscode.workspace.getConfiguration().get("twitter.consumerSecret"),
+  vscode.workspace.getConfiguration().get("twitter.accessTokenKey"),
+  vscode.workspace.getConfiguration().get("twitter.accessTokenSecret"),
 ]
 
 const P_TITLE = 'Polacode 📸'
@@ -27,15 +28,7 @@ function activate(context) {
   let lastUsedImageUri = vscode.Uri.file(path.resolve(homedir(), 'Desktop/code.png'))
   let panel
 
-  const checkIfKeyIsNoSet = (key) => {
-    return key === undefined || key === ""
-  }
-  const credentialArray = [
-    vscode.workspace.getConfiguration().get("twitter.comsumerKey"),
-    vscode.workspace.getConfiguration().get("twitter.comsumerSecret"),
-    vscode.workspace.getConfiguration().get("twitter.accessTokenKey"),
-    vscode.workspace.getConfiguration().get("twitter.accessTokenSecret"),
-  ]
+  checkIfKeyIsNoSet(credentialArray)
 
   if (credentialArray.every(checkIfKeyIsNoSet)) {
     vscode.window.showErrorMessage(
@@ -168,6 +161,51 @@ function getHtmlContent(htmlPath) {
     const realSource = 'vscode-resource:' + path.resolve(htmlPath, '..', src)
     return `script src="${realSource}"`
   })
+}
+
+function sendTweet(status) {
+  getClient().post("statuses/update", status, function(err) {
+    if (!err) {
+      vscode.showInformationMessage("The tweet has been sent!")
+    } else {
+      vscode.showErrorMessage("Sorry, the tweet failed to send.")
+    }
+  })
+}
+
+function getClient() {
+  const credentialArray = [
+    vscode.workspace.getConfiguration().get("twitter.consumerKey"),
+    vscode.workspace.getConfiguration().get("twitter.consumerSecret"),
+    vscode.workspace.getConfiguration().get("twitter.accessTokenKey"),
+    vscode.workspace.getConfiguration().get("twitter.accessTokenSecret"),
+  ]
+
+  if (!checkIfKeyIsNoSet(credentialArray)) {
+    return new Twitter({
+      consumer_key: credentialArray[0],
+      consumer_secret: credentialArray[1],
+      access_token_key: credentialArray[2],
+      access_token_secret: credentialArray[3],
+    })
+  } else {
+    return
+  }
+}
+
+function checkIfKeyIsNoSet(credentialArray) {
+  if (
+    credentialArray.every((key) => {
+      return key === undefined || key === ""
+    })
+  ) {
+    vscode.window.showErrorMessage(
+      `Your Twitter credentials don't seem to have been entered. Please follow the extension's README to set it.`
+    )
+    return true
+  } else {
+    return false
+  }
 }
 
 exports.activate = activate
