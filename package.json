@@ -1,8 +1,8 @@
 {
-  "name": "polacode",
-  "displayName": "Polacode",
-  "description": "📸  Polaroid for your code",
-  "version": "0.3.4",
+  "name": "polacode-twitter",
+  "displayName": "Polacode-Twitter",
+  "description": "📸  Polaroid for your code and tweet it.",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/octref/polacode.git"
@@ -35,12 +35,32 @@
     "commands": [
       {
         "command": "polacode.activate",
-        "title": "Polacode 📸"
+        "title": "Polacode-Twitter"
       }
     ],
     "configuration": {
-      "title": "Polacode",
+      "title": "Polacode-Twitter",
       "properties": {
+        "twitter.consumerKey": {
+          "type": "string",
+          "description": "Specify your twitter app consumer key",
+          "default": ""
+        },
+        "twitter.consumerSecret": {
+          "type": "string",
+          "description": "Specify your twitter app consumer Secret",
+          "default": ""
+        },
+        "twitter.accessTokenKey": {
+          "type": "string",
+          "description": "Specify your twitter app access token",
+          "default": ""
+        },
+        "twitter.accessTokenSecret": {
+          "type": "string",
+          "description": "Specify your twitter app access token secret",
+          "default": ""
+        },
         "polacode.shadow": {
           "type": "string",
           "description": "Shadow of the snippet node. Use any value for CSS `box-shadow`",
@@ -76,5 +96,8 @@
   "devDependencies": {
     "@types/node": "^11.12.0",
     "@types/vscode": "^1.32.0"
+  },
+  "dependencies": {
+    "twitter": "^1.7.1"
   }
 }
