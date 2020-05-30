@@ -123,7 +123,33 @@ function activate(context) {
           break
         case 'invalidPasteContent':
           vscode.window.showInformationMessage(
-            'Pasted content is invalid. Only copy from VS Code and check if your shortcuts for copy/paste have conflicts.'
+            "Pasted content is invalid. Only copy from VS Code and check if your shortcuts for copy/paste have conflicts."
+          )
+          break
+        case "tweet":
+          const bytes = new Uint8Array(data.serializedBlob.split(","))
+          getClient().post(
+            "media/upload",
+            { media: Buffer.from(bytes) },
+            function(err, media) {
+              if (!err) {
+                vscode.window
+                  .showInputBox({
+                    prompt: "Enter the content of your tweet.",
+                  })
+                  .then((value) => {
+                    if (value !== undefined) {
+                      const status = {
+                        status: value,
+                        media_ids: media.media_id_string,
+                      }
+                      sendTweet(status)
+                    }
+                  })
+              } else {
+                vscode.showErrorMessage("Sorry, failed to upload the image.")
+              }
+            }
           )
           break
       }
